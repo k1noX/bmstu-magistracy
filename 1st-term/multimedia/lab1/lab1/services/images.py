@@ -84,8 +84,7 @@ class ImageService:
             channel: np.ndarray[np.float64],
             percent: float,
     ) -> np.ndarray[np.uint8]:
-        multiplicative = 1 - percent / 100
-        channel *= multiplicative
+        channel -= percent / 100
         channel[channel > 1] = 1
         channel[channel < 0] = 0
         return channel
