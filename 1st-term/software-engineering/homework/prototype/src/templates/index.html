@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title> <!-- Используем переменную title для заголовка страницы -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}"> <!-- Подключаем стили -->
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">Электроника</div>
+            <nav>
+                <ul>
+                    <li><a href="#about">О компании</a></li>
+                    <li><a href="#products">Каталог</a></li>
+                    <li><a href="#contact">Контакты</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="hero" style="background: url('{{ url_for('static', filename='images/hero.png') }}') no-repeat center center/cover;">
+        <div class="container">
+            <h1>{{ hero_title }}</h1>
+            <p>{{ hero_description }}</p>
+            <button>{{ hero_button_text }}</button>
+        </div>
+    </div>
+
+    <section id="about" class="container">
+        <h2>О компании</h2>
+        <div>
+            <h3>История компании</h3>
+            <p>Наша компания была основана в <strong>2010 году</strong> с целью предоставления качественных решений для бизнеса в области информационных технологий. С самого начала мы ориентировались на создание высококлассной продукции, которая поможет нашим клиентам достигать успеха в своей деятельности. Мы начинали с небольшой команды, но благодаря настойчивости и профессионализму наших сотрудников, компания стала одним из лидеров отрасли.</p>
+
+            <h3>Миссия и ценности</h3>
+            <p>Миссия нашей компании — предоставлять инновационные решения, которые способствуют росту и развитию бизнеса наших клиентов. Мы ориентируемся на создание долгосрочных партнерских отношений, основанных на доверии и взаимной выгоде.</p>
+            <ul>
+                <li><strong>Качество</strong>: Мы всегда стремимся к совершенству в каждой детали нашей работы, обеспечивая безупречное качество продукции и услуг.</li>
+                <li><strong>Инновации</strong>: Мы постоянно внедряем новые технологии и подходы, чтобы предложить нашим клиентам лучшие решения.</li>
+                <li><strong>Честность и ответственность</strong>: Мы придерживаемся высоких этических стандартов и всегда выполняем свои обязательства перед партнерами и клиентами.</li>
+                <li><strong>Ориентированность на клиента</strong>: Мы всегда ставим интересы наших клиентов на первое место и работаем, чтобы превзойти их ожидания.</li>
+            </ul>
+
+            <h3>Наши продукты и услуги</h3>
+            <p>Компания предлагает широкий ассортимент продуктов и услуг в области <strong>информационных технологий</strong>. Мы специализируемся на разработке программного обеспечения, автоматизации бизнес-процессов и предоставлении IT-консалтинга. Все наши решения разрабатываются с учетом потребностей клиентов и с применением современных технологий.</p>
+            <p>Основные направления:</p>
+            <ul>
+                <li>Разработка корпоративных систем</li>
+                <li>Создание мобильных приложений</li>
+                <li>IT-консалтинг</li>
+                <li>Автоматизация бизнес-процессов</li>
+            </ul>
+
+            <h3>Наша команда</h3>
+            <p>Наша команда состоит из высококвалифицированных специалистов, которые любят свою работу и всегда стремятся к самосовершенствованию. Мы ценим в сотрудниках творческий подход, инициативность и умение работать в команде. Каждый наш сотрудник — это важная часть компании, и мы гордимся тем, что у нас работает такой талантливый коллектив.</p>
+
+            <h3>Наша философия</h3>
+            <p>Мы верим в постоянное развитие и совершенствование, не только в технологиях, но и в подходах к бизнесу. Наша философия основывается на принципах устойчивого роста, инноваций и соблюдения этических стандартов. Мы уверены, что наше стремление к улучшению будет способствовать успеху наших клиентов и партнеров.</p>
+
+            <h3>Партнерство и будущее</h3>
+            <p>Компания всегда открыта для новых возможностей и партнерств. Мы активно развиваем международные отношения и стремимся выходить на новые рынки, предлагая наши решения глобальной аудитории. В будущем мы планируем расширять ассортимент продукции, внедрять новые технологии и поддерживать устойчивое развитие.</p>
+
+            <p>Присоединяйтесь к нам, и вместе мы достигнем новых вершин!</p>
+        </div>
+    </section>
+
+    <section id="products" class="container">
+        <h2>Каталог продукции</h2>
+        <div class="container features">
+            {% for product in products %}
+            <article>
+                <h3>{{ product.name }}</h3>
+                <p>{{ product.description }}</p>
+                <img src="{{ url_for('static', filename='images/products/' + product.image_url) }}" alt="{{ product.name }}" class="product-image">
+            </article>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section id="employment" class="container">
+        <h2>Форма трудоустройства</h2>
+        <p>Хотите стать частью нашей команды? Заполните форму ниже, и мы рассмотрим вашу заявку!</p>
+        
+        <form action="/job_applications/" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="name">Ваше имя</label>
+                <input type="text" id="name" name="name" required placeholder="Введите ваше имя">
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required placeholder="Введите ваш email">
+            </div>
+            <div class="form-group">
+                <label for="position">Желаемая должность</label>
+                <input type="text" id="position" name="position" required placeholder="Введите должность">
+            </div>
+            <div class="form-group">
+                <label for="experience">Опыт работы (кратко)</label>
+                <textarea id="experience" name="experience" required placeholder="Опишите ваш опыт работы"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="resume">Загрузить резюме</label>
+                <input type="file" id="resume" name="resume" required>
+            </div>
+            <button type="submit">Отправить заявку</button>
+        </form>
+    </section>
+
+    <section id="contact" class="container">
+        <h2>Форма обратной связи</h2>
+        <p>Мы всегда рады услышать ваши замечания, предложения и вопросы. Пожалуйста, оставьте сообщение, и мы обязательно ответим!</p>
+        
+        <form action="/feedback/" method="POST">
+            <div class="form-group">
+                <label for="name">Ваше имя</label>
+                <input type="text" id="name" name="name" required placeholder="Введите ваше имя">
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required placeholder="Введите ваш email">
+            </div>
+            <div class="form-group">
+                <label for="message">Сообщение</label>
+                <textarea id="message" name="message" required placeholder="Ваше сообщение"></textarea>
+            </div>
+            <button type="submit">Отправить сообщение</button>
+        </form>
+    </section>
+
+    <footer class="container">
+        <p>© 2024 Электроника. Все права защищены.</p>
+    </footer>
+</body>
+</html>
