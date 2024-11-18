@@ -1,0 +1,35 @@
+version: "3.9"
+
+services:
+
+  postgres:
+    image: postgres:14-alpine3.20
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:5432:5432'
+    logging:
+      options:
+        max-size: 1024k
+        max-file: '5'
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 2
+      start_period: 10s
+    command: -c max_connections=100
+    shm_size: '1gb'
+    env_file:
+      - ./pg.env
+    volumes:
+      - /home/k1/studies/1st-term/software-engineering/lab3/postgres/data:/var/lib/postgresql/data
+
+  module:
+    image: "k1/orders-module"
+    restart: unless-stopped
+    deploy:
+      replicas: 1
+    logging:
+      options:
+        max-size: 1024k
+        max-file: '5'

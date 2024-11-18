@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление заказами</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        body {
+            background-color: #f0f4f8;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 3rem auto;
+        }
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+        }
+        .card-body {
+            padding: 1rem;
+        }
+        .order-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        .order-price {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 0.5rem;
+        }
+        .modal-header {
+            background-color: #007bff;
+            color: white;
+        }
+        .order-description {
+            font-size: 0.9rem;
+        }
+        .btn-danger {
+            background-color: #dc3545;
+            border: none;
+        }
+        .btn-danger:hover {
+            background-color: #b02a37;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        .btn-success {
+            background-color: #28a745;
+            border: none;
+        }
+        .btn-success:hover {
+            background-color: #218838;
+        }
+        #toast-container {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 1060;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h4">Управление заказами</h1>
+            <div class="d-flex justify-content-between">
+                <button class="btn btn-primary me-3" data-bs-toggle="modal" data-bs-target="#createOrderModal">Создать заказ</button>
+                <a href="/" class="btn btn-secondary">На главную</a>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            {% for order in orders %}
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="order-title">Заказ #{{ order.order_id }}</div>
+                        <div class="order-price">Общая стоимость: {{ order.total_price }} ₽</div>
+                        <div class="order-description">
+                            <strong>Клиент:</strong> {{ order.customer_name }}<br>
+                            <strong>Сотрудник:</strong> {{ order.employee_name }}
+                        </div>
+                        <div class="order-items">
+                            <div class="order-description"><strong>Товары:</strong></div>
+                            <ul class="list-group list-group-flush order-description">
+                                {% for item in order.order_items %}
+                                <li class="list-group-item">
+                                    {{ item.name }} - {{ item.quantity }} шт. - {{ item.price }} ₽ за штуку
+                                    <br><strong>Итоговая стоимость:</strong> {{ item.total_price }} ₽
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <button class="btn btn-danger btn-sm w-100 mt-3" onclick="deleteOrder({{ order.order_id }})">Удалить заказ</button>
+                        <a href="/orders/{{ order.order_id }}/invoice" class="btn btn-link btn-sm w-100 mt-3" download>Скачать накладную</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Модальное окно для создания нового заказа -->
+    <div class="modal fade" id="createOrderModal" tabindex="-1" aria-labelledby="createOrderModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header text-white">
+                    <h5 class="modal-title" id="createOrderModalLabel">Создать новый заказ</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="createOrderForm">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="customerIdInput" class="form-label">Введите ID клиента</label>
+                            <input type="number" class="form-control" id="customerIdInput" required>
+                            <div id="customerDetails" class="mt-2"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="productIdInput" class="form-label">Введите ID товара</label>
+                            <input type="number" class="form-control" id="productIdInput" required>
+                            <div id="productDetails" class="mt-2"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="productQuantityInput" class="form-label">Введите количество товара</label>
+                            <input type="number" class="form-control" id="productQuantityInput" required>
+                        </div>
+                        <button type="button" class="btn btn-primary" id="addProductButton">Добавить товар</button>
+                        <hr>
+                        <h6>Товары в заказе:</h6>
+                        <ul id="orderItemsList" class="list-group">
+                            <!-- Добавленные товары будут отображаться здесь -->
+                        </ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                        <button type="submit" class="btn btn-success">Создать заказ</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно подтверждения удаления -->
+    <div class="modal fade" id="deleteOrderModal" tabindex="-1" aria-labelledby="deleteOrderModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deleteOrderModalLabel">Удаление заказа</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Вы уверены, что хотите удалить заказ №<span id="orderIdToDelete" class="fw-bold"></span>?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteButton">Удалить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Тосты для уведомлений -->
+    <div id="toast-container" class="position-fixed top-0 end-0 p-3" style="z-index: 1060;">
+        <!-- Тосты будут динамически добавляться сюда -->
+    </div>
+
+    <script>
+        let orderIdToDelete = null;
+        let currentProducts = [];
+
+        // Функция для создания тоста
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.classList.add('toast', 'fade', 'show', 'text-white', 'border-0');
+            toast.role = 'alert'
+            toast.ariaLive = 'assertive'
+            toast.ariaAtomic = true
+            toast.classList.add(type === 'error' ? 'bg-danger' : 'bg-success');
+            toast.style.marginBottom = '10px';
+            toast.innerHTML = `
+                <div class="toast-body">
+                    ${message}
+                </div>
+            `;
+            document.getElementById('toast-container').appendChild(toast);
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // Функция для добавления товара в заказ
+        async function addProduct() {
+            const productId = document.getElementById('productIdInput').value;
+            const quantity = document.getElementById('productQuantityInput').value;
+
+            if (!productId || !quantity) {
+                showToast('Введите ID товара и количество!', 'error');
+                return;
+            }
+
+            try {
+                const productResponse = await fetch(`/products/${productId}`);
+                const product = await productResponse.json();
+
+                if (!product) {
+                    showToast('Товар не найден!', 'error');
+                    return;
+                }
+
+                currentProducts.push({ productId: product.id, name: product.name, quantity: quantity, price: product.price, itemId: Date.now() });
+                updateOrderItemsList();
+                showToast('Товар добавлен в заказ!');
+            } catch (error) {
+                showToast('Ошибка при добавлении товара!', 'error');
+            }
+        }
+
+        // Функция для обновления списка товаров в заказе
+        function updateOrderItemsList() {
+            const orderItemsList = document.getElementById('orderItemsList');
+            orderItemsList.innerHTML = '';
+            currentProducts.forEach(item => {
+                const li = document.createElement('li');
+                li.classList.add('list-group-item');
+                li.innerHTML = `${item.name} - ${item.quantity} шт. - ${item.price} ₽ за штуку
+                        <button class="btn btn-danger btn-sm remove-item">Удалить</button>`;
+                li.dataset.itemId = item.itemId;
+                orderItemsList.appendChild(li);
+            });
+        }
+
+        // Функция для получения информации о клиенте по ID
+        async function getCustomerInfo(customerId) {
+            if (!customerId) return;
+
+            try {
+                const response = await fetch(`/customers/${customerId}/`);
+                const customer = await response.json();
+
+                const customerDetails = document.getElementById('customerDetails');
+                if (customer) {
+                    customerDetails.innerHTML = `
+                        <strong>Имя клиента:</strong> ${customer.fullname}
+                    `;
+                } else {
+                    customerDetails.innerHTML = 'Клиент не найден.';
+                }
+            } catch (error) {
+                showToast('Ошибка при получении данных клиента!', 'error');
+            }
+        }
+
+        // Функция для получения информации о товаре по ID
+        async function getProductInfo(productId) {
+            if (!productId) return;
+
+            try {
+                const response = await fetch(`/products/${productId}/`);
+                const product = await response.json();
+
+                const productDetails = document.getElementById('productDetails');
+                if (product) {
+                    productDetails.innerHTML = `
+                        <strong>Товар:</strong> ${product.name} (${product.price} ₽)
+                    `;
+                } else {
+                    productDetails.innerHTML = 'Товар не найден.';
+                }
+            } catch (error) {
+                showToast('Ошибка при получении данных о товаре!', 'error');
+            }
+        }
+
+        // Обработчик для отправки формы создания заказа
+        document.getElementById('createOrderForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const customerId = document.getElementById('customerIdInput').value;
+            if (!customerId) {
+                showToast('Введите ID клиента!', 'error');
+                return;
+            }
+
+            const orderItems = currentProducts.map(item => ({
+                product_id: item.productId,
+                quantity: item.quantity
+            }));
+
+            const response = await fetch('/orders/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ customer_id: customerId, items: orderItems })
+            });
+
+            if (response.ok) {
+                showToast('Заказ успешно создан!');
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                showToast('Произошла ошибка при создании заказа!', 'error');
+            }
+        });
+
+        // Обработчик для поиска клиента при изменении ID клиента
+        document.getElementById('customerIdInput').addEventListener('input', function() {
+            getCustomerInfo(this.value);
+        });
+
+        // Обработчик для поиска товара при изменении ID товара
+        document.getElementById('productIdInput').addEventListener('input', function() {
+            getProductInfo(this.value);
+        });
+
+        // Обработчик для добавления товара в заказ
+        document.getElementById('addProductButton').addEventListener('click', addProduct);
+
+        // Функция для удаления заказа
+        function deleteOrder(orderId) {
+            orderIdToDelete = orderId;
+            document.getElementById('orderIdToDelete').textContent = orderId;
+            new bootstrap.Modal(document.getElementById('deleteOrderModal')).show();
+        }
+
+        // Подтверждение удаления заказа
+        document.getElementById('confirmDeleteButton').addEventListener('click', async function() {
+            if (orderIdToDelete !== null) {
+                try {
+                    const response = await fetch(`/orders/?id=${orderIdToDelete}`, {
+                        method: 'DELETE',
+                    });
+
+                    if (response.ok) {
+                        showToast(`Заказ №${orderIdToDelete} удален!`);
+                        setTimeout(() => location.reload(), 1000);
+                    } else {
+                        showToast('Произошла ошибка при удалении заказа!', 'error');
+                    }
+                } catch (error) {
+                    showToast('Произошла ошибка при удалении заказа!', 'error');
+                }
+            }
+        });
+        document.getElementById('orderItemsList').addEventListener('click', (event) => {
+            if (event.target.classList.contains('remove-item')) {
+                const listItem = event.target.closest('li');
+                const itemId = listItem.dataset.itemId;
+
+                listItem.remove();
+                currentProducts = currentProducts.filter(item => item.itemId !== Number(itemId));
+                showToast('Товар удален из заказа!', 'warning');
+            }
+        });
+    </script>
+</body>
+</html>

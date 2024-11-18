@@ -1,0 +1,6 @@
+sqlalchemy
+flask
+psycopg2-binary
+flask-login
+sqlalchemy_utils
+weasyprint
