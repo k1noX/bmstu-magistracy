@@ -7601,7 +7601,7 @@ Note: you may need to restart the kernel to use updated packages.
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [301]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [2]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">sympy</span> <span class="k">as</span> <span class="nn">sp</span>
@@ -7617,7 +7617,7 @@ Note: you may need to restart the kernel to use updated packages.
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [302]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [3]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">num</span> <span class="o">=</span> <span class="mi">7</span>     <span class="c1"># номер по журналу</span>
@@ -7645,7 +7645,7 @@ Note: you may need to restart the kernel to use updated packages.
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [303]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [4]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">gr</span> <span class="o">*</span> <span class="nb">pow</span><span class="p">(</span><span class="n">t</span> <span class="o">-</span> <span class="n">num</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="n">t</span>
@@ -7672,7 +7672,7 @@ Note: you may need to restart the kernel to use updated packages.
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [304]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [5]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">fourier</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">fourier_series</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="o">*</span><span class="n">t_range</span><span class="p">))</span>
@@ -7687,7 +7687,7 @@ Note: you may need to restart the kernel to use updated packages.
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[304]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[5]:</div>
 <div class="jp-RenderedLatex jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/latex" tabindex="0">
 $\displaystyle - \frac{14 \sin{\left(\frac{\pi t}{7} \right)}}{\pi} - \frac{7 \sin{\left(\frac{2 \pi t}{7} \right)}}{\pi} + \frac{784 \cos{\left(\frac{\pi t}{7} \right)}}{\pi^{2}} + \frac{196 \cos{\left(\frac{2 \pi t}{7} \right)}}{\pi^{2}} + \frac{217}{3} + \ldots$
 </div>
@@ -7699,10 +7699,10 @@ $\displaystyle - \frac{14 \sin{\left(\frac{\pi t}{7} \right)}}{\pi} - \frac{7 \s
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [305]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [6]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">sp</span><span class="o">.</span><span class="n">simplify</span><span class="p">(</span><span class="n">fourier</span><span class="p">)</span><span class="o">.</span><span class="n">truncate</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">sp</span><span class="o">.</span><span class="n">simplify</span><span class="p">(</span><span class="n">fourier</span><span class="o">.</span><span class="n">truncate</span><span class="p">())</span>
 </pre></div>
 </div>
 </div>
@@ -7713,9 +7713,9 @@ $\displaystyle - \frac{14 \sin{\left(\frac{\pi t}{7} \right)}}{\pi} - \frac{7 \s
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[305]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[6]:</div>
 <div class="jp-RenderedLatex jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/latex" tabindex="0">
-$\displaystyle - \frac{14 \sin{\left(\frac{\pi t}{7} \right)}}{\pi} - \frac{7 \sin{\left(\frac{2 \pi t}{7} \right)}}{\pi} - \frac{14 \sin{\left(\frac{3 \pi t}{7} \right)}}{3 \pi} - \frac{7 \sin{\left(\frac{4 \pi t}{7} \right)}}{2 \pi} + \frac{784 \cos{\left(\frac{\pi t}{7} \right)}}{\pi^{2}} + \frac{196 \cos{\left(\frac{2 \pi t}{7} \right)}}{\pi^{2}} + \frac{784 \cos{\left(\frac{3 \pi t}{7} \right)}}{9 \pi^{2}} + \frac{49 \cos{\left(\frac{4 \pi t}{7} \right)}}{\pi^{2}} + \frac{217}{3}$
+$\displaystyle \frac{7 \left(- 6 \pi \left(\cos{\left(\frac{\pi t}{7} \right)} + 1\right) \sin{\left(\frac{\pi t}{7} \right)} + 336 \cos{\left(\frac{\pi t}{7} \right)} + 84 \cos{\left(\frac{2 \pi t}{7} \right)} + 31 \pi^{2}\right)}{3 \pi^{2}}$
 </div>
 </div>
 </div>
