@@ -32,6 +32,6 @@ BaseOrmMappedModel.REGISTRY.mapped(Customer)
 class CustomerCreation(typing.TypedDict):
     """."""
 
-    full_name: str
+    fullname: str
     email: str
     phone: str

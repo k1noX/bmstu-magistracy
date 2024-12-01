@@ -13,7 +13,7 @@ class BaseModel:
         def serialize(obj: Any) -> Any:
             """Helper function to serialize nested objects."""
             if is_dataclass(obj):
-                return asdict(obj)
+                return asdict(obj) # noqa
             if isinstance(obj, list):
                 return [serialize(item) for item in obj]
             if isinstance(obj, dict):

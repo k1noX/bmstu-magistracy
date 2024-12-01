@@ -1,4 +1,6 @@
 import typing as t
+from decimal import Decimal
+
 import flask
 from flask import render_template
 from sqlalchemy.orm import Session
@@ -59,7 +61,7 @@ class OrdersService:
                 session.add(order_item)
                 total_price += product.price * int(item['quantity'])
 
-            new_order.total_price = total_price
+            new_order.total_price = Decimal(total_price)
             session.commit()
 
             return ModelsTranslator.order_view(new_order)  # noqa

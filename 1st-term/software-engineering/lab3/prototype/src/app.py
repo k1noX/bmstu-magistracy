@@ -49,7 +49,6 @@ def error_handler(error: Exception | ModuleException | HTTPException):
             "error": error.__class__.__name__,
             "data": {},
         })
-        response.status_code = error.code
     else:
         response = jsonify({
             "error": "InternalServerError",

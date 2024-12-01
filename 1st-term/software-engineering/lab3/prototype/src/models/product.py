@@ -1,6 +1,6 @@
 import dataclasses as dc
 import typing
-from numbers import Number
+from decimal import Decimal
 
 from sqlalchemy import Column, Integer, String, Numeric, Text
 
@@ -16,7 +16,7 @@ class Product(BaseOrmMappedModel):
     name: str = dc.field(
         metadata={'sa': Column(String, nullable=False)},
     )
-    price: Number = dc.field(
+    price: Decimal = dc.field(
         metadata={'sa': Column(Numeric, nullable=False)},
     )
     description: str = dc.field(
@@ -35,5 +35,5 @@ class ProductCreation(typing.TypedDict):
     """."""
 
     name: str
-    price: Number
+    price: Decimal
     description: str

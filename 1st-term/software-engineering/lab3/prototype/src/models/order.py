@@ -1,7 +1,7 @@
 import dataclasses as dc
 import datetime
 import typing
-from numbers import Number
+from decimal import Decimal
 
 from sqlalchemy import (
     Column,
@@ -43,8 +43,8 @@ class Order(BaseOrmMappedModel):
         default=None,
         metadata={'sa': Column(Integer, primary_key=True, autoincrement=True)},
     )
-    total_price: Number = dc.field(
-        default=0.0,
+    total_price: Decimal = dc.field(
+        default=Decimal(0),
         metadata={
             'sa': Column(Numeric, nullable=False),
         },
@@ -93,7 +93,7 @@ class OrderItems(BaseOrmMappedModel):
             'sa': Column(Integer, nullable=False),
         },
     )
-    price: Number = dc.field(
+    price: Decimal = dc.field(
         metadata={
             'sa': Column(Numeric, nullable=False),
         },
@@ -127,16 +127,16 @@ class OrderItemView(BaseModel):
     name: str
     product_id: int
     quantity: int
-    price: Number
-    total_price: Number
+    price: Decimal
+    total_price: Decimal
 
 
 @dc.dataclass
 class OrderView(BaseModel):
     """."""
     order_id: int
-    total_price: Number
+    total_price: Decimal
     employee: User | None
     customer: Customer | None
-    created_at: datetime.datetime
+    created_at: datetime.datetime | None
     order_items: list[OrderItemView] = dc.field(default_factory=list)
