@@ -52,7 +52,7 @@ class UserAuthorizationError(UserModuleException):
             data: dict | None = None,
     ):
         super().__init__(
-            message=f"ошибка авторизации.",
+            message="ошибка авторизации.",
             data=data or {"username": username},
         )
 
@@ -68,7 +68,7 @@ class UserNotFoundError(UserModuleException):
             data: dict | None = None,
     ):
         super().__init__(
-            message=f"пользователь не найден.",
+            message="пользователь не найден.",
             data=data or {"username": username, "user_id": user_id},
         )
 
@@ -180,7 +180,7 @@ class OrderCreationError(ModuleException):
             data: dict | None = None,
     ):
         super().__init__(
-            message=f"не удалось создать товар.",
+            message="не удалось создать товар.",
             data=data or {"reason": reason},
         )
 
@@ -195,7 +195,7 @@ class ProductCreationError(ModuleException):
             data: dict | None = None,
     ):
         super().__init__(
-            message=f"не удалось создать товар.",
+            message="не удалось создать товар.",
             data=data or {"reason": reason},
         )
 
@@ -210,6 +210,6 @@ class CustomerCreationError(ModuleException):
         data: dict | None = None,
     ):
         super().__init__(
-            message=f"не удалось создать клиента.",
+            message="не удалось создать клиента.",
             data=data or {"reason": reason},
         )

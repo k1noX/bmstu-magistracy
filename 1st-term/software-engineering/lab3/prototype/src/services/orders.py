@@ -30,7 +30,9 @@ class OrdersService:
         try:
             customer = session.query(Customer).get(creation['customer_id'])
             if not customer:
-                raise CustomerNotFoundError(customer_id=creation['customer_id'])
+                raise CustomerNotFoundError(
+                    customer_id=creation['customer_id'],
+                )
 
             new_order = Order(
                 customer_id=creation['customer_id'],
@@ -63,7 +65,7 @@ class OrdersService:
             return ModelsTranslator.order_view(new_order)  # noqa
         except ProductNotFoundError as e:
             raise e
-        except Exception as e:
+        except Exception:
             session.rollback()
             raise OrderCreationError
 
@@ -101,7 +103,7 @@ class OrdersService:
             return ModelsTranslator.order_view(order)  # noqa
         except OrderNotFoundError as e:
             raise e
-        except Exception as e:
+        except Exception:
             session.rollback()
             raise OrderDeletionError(order_id=ident)
 

@@ -1,5 +1,5 @@
 from injectors.services import ServicesInjector
-from flask import Blueprint, request, jsonify, url_for, redirect
+from flask import Blueprint, request, jsonify
 from flask_login import login_required
 
 from models.user import UserLogin
