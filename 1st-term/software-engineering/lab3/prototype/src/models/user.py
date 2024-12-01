@@ -1,3 +1,5 @@
+import typing
+
 from sqlalchemy import Column, Integer, String
 from flask_login import UserMixin
 
@@ -41,3 +43,10 @@ class User(BaseOrmMappedModel, UserMixin):
 
 
 BaseOrmMappedModel.REGISTRY.mapped(User)
+
+
+class UserLogin(typing.TypedDict):
+    """."""
+
+    username: str
+    password: str

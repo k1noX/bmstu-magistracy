@@ -21,14 +21,16 @@ def get_orders():
 @login_required
 def create_order():
     creation = OrderCreation(**request.json)
-    return jsonify(ServicesInjector().orders().add(creation, current_user.id))
+    order = ServicesInjector().orders().add(creation, current_user.id)
+    return jsonify(order.to_dict())
 
 
 @orders_bp.route('/', methods=['DELETE'])
 @login_required
 def remove_order():
     ident = int(request.args.get('id'))
-    return jsonify(ServicesInjector().orders().remove(ident))
+    order = ServicesInjector().orders().remove(ident)
+    return jsonify(order.to_dict())
 
 
 @orders_bp.route('/<int:ident>/invoice', methods=['GET'])

@@ -1,6 +1,8 @@
 from injectors.services import ServicesInjector
 from flask import Blueprint, request, jsonify, url_for, redirect
-from flask_login import login_required, login_user
+from flask_login import login_required
+
+from models.user import UserLogin
 
 users_bp = Blueprint('users', __name__, url_prefix='/users')
 
@@ -14,9 +16,5 @@ def get_users():
 
 @users_bp.route('/', methods=['POST'])
 def validate_user():
-    username = request.form.get('username')
-    password = request.form.get('password')
-    user = ServicesInjector().users().validate(username, password)
-    if user:
-        login_user(user)
-    return redirect(url_for('main.index'))
+    login_request = UserLogin(**request.json)
+    return ServicesInjector().users().login_user(login_request)

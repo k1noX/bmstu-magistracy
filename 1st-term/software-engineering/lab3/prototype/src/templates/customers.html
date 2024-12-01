@@ -143,33 +143,30 @@
 
     <!-- Контейнер для тостов -->
     <div class="toast-container">
-        <div id="successToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="d-flex">
-                <div class="toast-body">
-                    Действие успешно выполнено!
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-        </div>
-        <div id="errorToast" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="d-flex">
-                <div class="toast-body">
-                    Произошла ошибка, повторите попытку.
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-        </div>
     </div>
 
     <script>
         let clientIdToDelete = null;
 
-        function showToast(toastId) {
-            const toastElement = document.getElementById(toastId);
-            const toast = new bootstrap.Toast(toastElement);
-            toast.show();
+        // Функция для создания тоста с сообщением
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.classList.add('toast', 'fade', 'show', 'text-white', 'border-0');
+            toast.role = 'alert';
+            toast.ariaLive = 'assertive';
+            toast.ariaAtomic = true;
+            toast.classList.add(type === 'error' ? 'bg-danger' : (type === 'warning' ? 'bg-warning' : 'bg-success'));
+            toast.style.marginBottom = '10px';
+            toast.innerHTML = `
+                <div class="toast-body">
+                    ${message}
+                </div>
+            `;
+            document.getElementById('toast-container').appendChild(toast);
+            setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
+        // Показ модального окна для подтверждения удаления
         function showDeleteConfirmation(id, name) {
             clientIdToDelete = id;
             document.getElementById('clientNameToDelete').textContent = name;
@@ -177,40 +174,64 @@
             deleteModal.show();
         }
 
+        // Универсальная обработка ответа сервера
+        async function handleResponse(response) {
+            if (!response.ok) {
+                const error = await response.json();
+                const errorMessage = error.message || 'Неизвестная ошибка.';
+                console.error(`Ошибка: ${errorMessage}`);
+                throw new Error(errorMessage);
+            }
+            return response.json();
+        }
+
+        // Функция для добавления клиента
         async function addClient() {
-            const fullname = document.getElementById('fullname').value;
-            const email = document.getElementById('email').value;
-            const phone = document.getElementById('phone').value;
+            const fullname = document.getElementById('fullname').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
 
-            const response = await fetch('/customers/', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ fullname, email, phone })
-            });
+            if (!fullname || !email) {
+                showToast('Имя и Email обязательны для заполнения!', 'error');
+                return;
+            }
 
-            if (response.ok) {
-                showToast('successToast');
+            try {
+                const response = await fetch('/customers/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ fullname, email, phone })
+                });
+
+                await handleResponse(response);
+                showToast('Клиент успешно добавлен!');
                 setTimeout(() => location.reload(), 1000);
-            } else {
-                showToast('errorToast');
+            } catch (error) {
+                showToast(`Ошибка при добавлении клиента: ${error.message}`, 'error');
             }
         }
 
+        // Функция для удаления клиента
         async function deleteClient() {
-            if (!clientIdToDelete) return;
+            if (!clientIdToDelete) {
+                showToast('Клиент для удаления не выбран!', 'error');
+                return;
+            }
 
-            const response = await fetch(`/customers/?id=${clientIdToDelete}`, {
-                method: 'DELETE'
-            });
+            try {
+                const response = await fetch(`/customers/?id=${clientIdToDelete}`, {
+                    method: 'DELETE'
+                });
 
-            if (response.ok) {
-                showToast('successToast');
+                await handleResponse(response);
+                showToast('Клиент успешно удален!');
                 setTimeout(() => location.reload(), 1000);
-            } else {
-                showToast('errorToast');
+            } catch (error) {
+                showToast(`Ошибка при удалении клиента: ${error.message}`, 'error');
             }
         }
 
+        // Обработчик для подтверждения удаления клиента
         document.getElementById('confirmDeleteButton').addEventListener('click', deleteClient);
     </script>
 </body>

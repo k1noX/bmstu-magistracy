@@ -10,66 +10,91 @@
         body {
             background-color: #f0f4f8;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
         }
-        .login-card {
-            width: 100%;
+        .login-container {
             max-width: 400px;
-            padding: 2rem;
-            background: white;
-            border-radius: 12px;
+            margin: 100px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            text-align: center;
         }
-        .login-card h1 {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            color: #333;
-        }
-        .login-card p {
-            font-size: 0.9rem;
-            margin: 2rem;
-        }
-        .card-title {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: black;
-        }
-        .login-card .btn-primary {
-            width: 100%;
+        .btn-primary {
             background-color: #007bff;
             border: none;
         }
-        .login-card .btn-primary:hover {
+        .btn-primary:hover {
             background-color: #0056b3;
         }
-        .login-card .form-text {
-            text-align: center;
-            margin-top: 1rem;
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
+        }
+        #toast-container {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 1060;
         }
     </style>
 </head>
 <body>
-    <div class="login-card">
-        <h5 class="card-title">Добро пожаловать!</h5>
-        <p class="card-text mb-3">
-            Это приложение предназначено для сотрудников и помогает эффективно управлять торговлей
-        </p>
-        <form method="POST" action="/users/">
+    <div class="login-container">
+        <h2 class="text-center">Вход</h2>
+        <form id="loginForm">
             <div class="mb-3">
                 <label for="username" class="form-label">Имя пользователя</label>
-                <input type="text" id="username" name="username" class="form-control" placeholder="Имя пользователя" required>
+                <input type="text" class="form-control" id="username" name="username" required>
             </div>
             <div class="mb-3">
                 <label for="password" class="form-label">Пароль</label>
-                <input type="password" id="password" name="password" class="form-control" placeholder="Пароль" required>
+                <input type="password" class="form-control" id="password" name="password" required>
             </div>
-            <button type="submit" class="btn btn-primary">Войти</button>
+            <button type="submit" class="btn btn-primary w-100">Войти</button>
         </form>
     </div>
+
+    <!-- Тосты для уведомлений -->
+    <div id="toast-container"></div>
+
+    <script>
+        // Функция для отображения уведомлений
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.classList.add('toast', 'fade', 'show', 'text-white', 'border-0');
+            toast.role = 'alert';
+            toast.innerHTML = `
+                <div class="toast-body bg-${type === 'error' ? 'danger' : 'success'}">
+                    ${message}
+                </div>`;
+            document.getElementById('toast-container').appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // Обработчик формы логина
+        document.getElementById('loginForm').addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch('/users/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (response.ok) {
+                    window.location.href = '/'; // Редирект на главную страницу
+                } else {
+                    const errorData = await response.json();
+                    showToast(errorData.message || 'Произошла ошибка!', 'error');
+                }
+            } catch (error) {
+                showToast('Ошибка соединения с сервером!', 'error');
+            }
+        });
+    </script>
 </body>
 </html>

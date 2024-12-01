@@ -92,18 +92,18 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="order-title">Заказ #{{ order.order_id }}</div>
-                        <div class="order-price">Общая стоимость: {{ order.total_price }} ₽</div>
+                        <div class="order-price">Общая стоимость: {{ '{:,.2f}'.format(order.total_price) }} ₽</div>
                         <div class="order-description">
-                            <strong>Клиент:</strong> {{ order.customer_name }}<br>
-                            <strong>Сотрудник:</strong> {{ order.employee_name }}
+                            <strong>Клиент:</strong> {{ order.customer.name }}<br>
+                            <strong>Сотрудник:</strong> {{ order.employee.name }}
                         </div>
                         <div class="order-items">
                             <div class="order-description"><strong>Товары:</strong></div>
                             <ul class="list-group list-group-flush order-description">
                                 {% for item in order.order_items %}
                                 <li class="list-group-item">
-                                    {{ item.name }} - {{ item.quantity }} шт. - {{ item.price }} ₽ за штуку
-                                    <br><strong>Итоговая стоимость:</strong> {{ item.total_price }} ₽
+                                    {{ item.name }} - {{ item.quantity }} шт. - {{ '{:,.2f}'.format(item.price) }} ₽ за штуку
+                                    <br><strong>Итоговая стоимость:</strong> {{ '{:,.2f}'.format(item.total_price) }} ₽
                                 </li>
                                 {% endfor %}
                             </ul>
@@ -189,10 +189,10 @@
         function showToast(message, type = 'success') {
             const toast = document.createElement('div');
             toast.classList.add('toast', 'fade', 'show', 'text-white', 'border-0');
-            toast.role = 'alert'
-            toast.ariaLive = 'assertive'
-            toast.ariaAtomic = true
-            toast.classList.add(type === 'error' ? 'bg-danger' : 'bg-success');
+            toast.role = 'alert';
+            toast.ariaLive = 'assertive';
+            toast.ariaAtomic = true;
+            toast.classList.add(type === 'error' ? 'bg-danger' : (type === 'warning' ? 'bg-warning' : 'bg-success'));
             toast.style.marginBottom = '10px';
             toast.innerHTML = `
                 <div class="toast-body">
@@ -201,6 +201,18 @@
             `;
             document.getElementById('toast-container').appendChild(toast);
             setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // Функция для обработки ответа с сервера
+        async function handleResponse(response) {
+            if (!response.ok) {
+                const error = await response.json();
+                const errorMessage = error.message || 'Неизвестная ошибка.';
+                const errorData = error.data || {};
+                console.error(`Ошибка: ${errorMessage}`, errorData);
+                throw new Error(errorMessage);
+            }
+            return response.json();
         }
 
         // Функция для добавления товара в заказ
@@ -215,18 +227,13 @@
 
             try {
                 const productResponse = await fetch(`/products/${productId}`);
-                const product = await productResponse.json();
-
-                if (!product) {
-                    showToast('Товар не найден!', 'error');
-                    return;
-                }
+                const product = await handleResponse(productResponse);
 
                 currentProducts.push({ productId: product.id, name: product.name, quantity: quantity, price: product.price, itemId: Date.now() });
                 updateOrderItemsList();
                 showToast('Товар добавлен в заказ!');
             } catch (error) {
-                showToast('Ошибка при добавлении товара!', 'error');
+                showToast(`Ошибка: ${error.message}`, 'error');
             }
         }
 
@@ -250,18 +257,13 @@
 
             try {
                 const response = await fetch(`/customers/${customerId}/`);
-                const customer = await response.json();
+                const customer = await handleResponse(response);
 
                 const customerDetails = document.getElementById('customerDetails');
-                if (customer) {
-                    customerDetails.innerHTML = `
-                        <strong>Имя клиента:</strong> ${customer.fullname}
-                    `;
-                } else {
-                    customerDetails.innerHTML = 'Клиент не найден.';
-                }
+                customerDetails.innerHTML = `<strong>Имя клиента:</strong> ${customer.fullname}`;
             } catch (error) {
-                showToast('Ошибка при получении данных клиента!', 'error');
+                showToast(`Ошибка: ${error.message}`, 'error');
+                customerDetails.innerHTML = ``;
             }
         }
 
@@ -271,18 +273,13 @@
 
             try {
                 const response = await fetch(`/products/${productId}/`);
-                const product = await response.json();
+                const product = await handleResponse(response);
 
                 const productDetails = document.getElementById('productDetails');
-                if (product) {
-                    productDetails.innerHTML = `
-                        <strong>Товар:</strong> ${product.name} (${product.price} ₽)
-                    `;
-                } else {
-                    productDetails.innerHTML = 'Товар не найден.';
-                }
+                productDetails.innerHTML = `<strong>Товар:</strong> ${product.name} (${product.price} ₽)`;
             } catch (error) {
-                showToast('Ошибка при получении данных о товаре!', 'error');
+                showToast(`Ошибка: ${error.message}`, 'error');
+                productDetails.innerHTML = ``;
             }
         }
 
@@ -301,17 +298,18 @@
                 quantity: item.quantity
             }));
 
-            const response = await fetch('/orders/', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ customer_id: customerId, items: orderItems })
-            });
+            try {
+                const response = await fetch('/orders/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ customer_id: customerId, items: orderItems })
+                });
 
-            if (response.ok) {
+                await handleResponse(response);
                 showToast('Заказ успешно создан!');
                 setTimeout(() => location.reload(), 1000);
-            } else {
-                showToast('Произошла ошибка при создании заказа!', 'error');
+            } catch (error) {
+                showToast(`Ошибка: ${error.message}`, 'error');
             }
         });
 
@@ -335,7 +333,7 @@
             new bootstrap.Modal(document.getElementById('deleteOrderModal')).show();
         }
 
-        // Подтверждение удаления заказа
+        // Обработчик для удаления заказа
         document.getElementById('confirmDeleteButton').addEventListener('click', async function() {
             if (orderIdToDelete !== null) {
                 try {
@@ -343,17 +341,16 @@
                         method: 'DELETE',
                     });
 
-                    if (response.ok) {
-                        showToast(`Заказ №${orderIdToDelete} удален!`);
-                        setTimeout(() => location.reload(), 1000);
-                    } else {
-                        showToast('Произошла ошибка при удалении заказа!', 'error');
-                    }
+                    await handleResponse(response);
+                    showToast(`Заказ №${orderIdToDelete} удален!`);
+                    setTimeout(() => location.reload(), 1000);
                 } catch (error) {
-                    showToast('Произошла ошибка при удалении заказа!', 'error');
+                    showToast(`Ошибка: ${error.message}`, 'error');
                 }
             }
         });
+
+        // Удаление товара из заказа
         document.getElementById('orderItemsList').addEventListener('click', (event) => {
             if (event.target.classList.contains('remove-item')) {
                 const listItem = event.target.closest('li');

@@ -86,7 +86,7 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="product-title">{{ product.name }}</div>
-                        <div class="product-price">{{ product.price }} ₽</div>
+                        <div class="product-price">{{ '{:,.2f}'.format(product.price) }} ₽</div>
                         <div class="product-description">{{ product.description }}</div>
                         <button class="btn btn-danger btn-sm w-100" onclick="showDeleteConfirmation({{ product.id }}, '{{ product.name }}')">Удалить</button>
                     </div>
@@ -147,35 +147,33 @@
         </div>
     </div>
 
-    <!-- Контейнер для тостов -->
-    <div class="toast-container">
-        <div id="successToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="d-flex">
-                <div class="toast-body">
-                    Действие успешно выполнено!
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-        </div>
-        <div id="errorToast" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="d-flex">
-                <div class="toast-body">
-                    Произошла ошибка, повторите попытку.
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-        </div>
+    <!-- Тосты для уведомлений -->
+    <div id="toast-container" class="position-fixed top-0 end-0 p-3" style="z-index: 1060;">
+        <!-- Тосты будут динамически добавляться сюда -->
     </div>
 
     <script>
         let productIdToDelete = null;
 
-        function showToast(toastId) {
-            const toastElement = document.getElementById(toastId);
-            const toast = new bootstrap.Toast(toastElement);
-            toast.show();
+        // Функция для создания тоста
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.classList.add('toast', 'fade', 'show', 'text-white', 'border-0');
+            toast.role = 'alert';
+            toast.ariaLive = 'assertive';
+            toast.ariaAtomic = true;
+            toast.classList.add(type === 'error' ? 'bg-danger' : (type === 'warning' ? 'bg-warning' : 'bg-success'));
+            toast.style.marginBottom = '10px';
+            toast.innerHTML = `
+                <div class="toast-body">
+                    ${message}
+                </div>
+            `;
+            document.getElementById('toast-container').appendChild(toast);
+            setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
+        // Функция отображения подтверждения удаления
         function showDeleteConfirmation(id, name) {
             productIdToDelete = id;
             document.getElementById('productNameToDelete').textContent = name;
@@ -183,40 +181,64 @@
             deleteModal.show();
         }
 
+        // Универсальная обработка ответа сервера
+        async function handleResponse(response) {
+            if (!response.ok) {
+                const error = await response.json();
+                const errorMessage = error.message || 'Неизвестная ошибка.';
+                console.error(`Ошибка: ${errorMessage}`);
+                throw new Error(errorMessage);
+            }
+            return response.json();
+        }
+
+        // Функция добавления товара
         async function addProduct() {
-            const name = document.getElementById('name').value;
-            const price = document.getElementById('price').value;
-            const description = document.getElementById('description').value;
+            const name = document.getElementById('name').value.trim();
+            const price = document.getElementById('price').value.trim();
+            const description = document.getElementById('description').value.trim();
 
-            const response = await fetch('/products/', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, price, description })
-            });
+            if (!name || !price) {
+                showToast('Название и цена товара обязательны!', 'error');
+                return;
+            }
 
-            if (response.ok) {
-                showToast('successToast');
+            try {
+                const response = await fetch('/products/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, price, description })
+                });
+
+                await handleResponse(response);
+                showToast('Товар успешно добавлен!');
                 setTimeout(() => location.reload(), 1000);
-            } else {
-                showToast('errorToast');
+            } catch (error) {
+                showToast(`Ошибка при добавлении товара: ${error.message}`, 'error');
             }
         }
 
+        // Функция удаления товара
         async function deleteProduct() {
-            if (!productIdToDelete) return;
+            if (!productIdToDelete) {
+                showToast('Товар для удаления не выбран!', 'error');
+                return;
+            }
 
-            const response = await fetch(`/products/?id=${productIdToDelete}`, {
-                method: 'DELETE'
-            });
+            try {
+                const response = await fetch(`/products/?id=${productIdToDelete}`, {
+                    method: 'DELETE'
+                });
 
-            if (response.ok) {
-                showToast('successToast');
+                await handleResponse(response);
+                showToast('Товар успешно удален!');
                 setTimeout(() => location.reload(), 1000);
-            } else {
-                showToast('errorToast');
+            } catch (error) {
+                showToast(`Ошибка при удалении товара: ${error.message}`, 'error');
             }
         }
 
+        // Обработчик на кнопку подтверждения удаления
         document.getElementById('confirmDeleteButton').addEventListener('click', deleteProduct);
     </script>
 </body>

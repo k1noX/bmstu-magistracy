@@ -29,6 +29,8 @@ services:
     restart: unless-stopped
     deploy:
       replicas: 1
+    ports:
+      - '127.0.0.1:80:80'
     logging:
       options:
         max-size: 1024k

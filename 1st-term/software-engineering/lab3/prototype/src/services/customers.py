@@ -2,39 +2,62 @@ from sqlalchemy.orm import Session
 import typing as t
 
 from models import Customer, CustomerCreation
+from models.exception import (
+    CustomerNotFoundError,
+    CustomerCreationError,
+    CustomerDeletionError,
+)
 
 
 class CustomersService:
-    """."""
+    """Service for managing customers."""
 
     def __init__(self, session_acquirer: t.Callable[[], Session]):
-        """."""
-
+        """Initialize the service with a session acquirer."""
         self._session_acquirer = session_acquirer
 
-    def get_all(self) -> list[dict]:
+    def get_all(self) -> list[Customer]:
+        """Retrieve all customers."""
         session = self._session_acquirer()
         customers = session.query(Customer).all()
-        return [c.to_dict() for c in customers] # noqa
+        return customers  # noqa
 
-    def get_by_id(self, customer_id: int) -> dict | None:
+    def get_by_id(self, customer_id: int) -> Customer:
+        """Retrieve a customer by ID."""
         session = self._session_acquirer()
         customer = session.query(Customer).filter_by(id=customer_id).first()
-        if customer is None:
-            return None
-        return customer.to_dict() # noqa
+        if not customer:
+            raise CustomerNotFoundError(customer_id=customer_id)
+        return customer # noqa
 
-    def add(self, creation: CustomerCreation) -> dict:
+    def add(self, creation: CustomerCreation) -> Customer:
+        """Add a new customer."""
         session = self._session_acquirer()
-        customer = Customer(**creation)
-        session.add(customer)
-        session.commit()
-        session.refresh(customer)
-        return customer.to_dict()
 
-    def remove(self, ident: int) -> dict:
+        try:
+            customer = Customer(**creation)
+            session.add(customer)
+            session.commit()
+            session.refresh(customer)
+            return customer  # noqa
+        except Exception:
+            session.rollback()
+            raise CustomerCreationError
+
+    def remove(self, ident: int) -> Customer:
+        """Remove a customer by ID."""
         session = self._session_acquirer()
-        customer = session.query(Customer).filter_by(id=ident).first()
-        session.delete(customer)
-        session.commit()
-        return customer.to_dict() # noqa
+
+        try:
+            customer = session.query(Customer).filter_by(id=ident).first()
+            if not customer:
+                raise CustomerNotFoundError(customer_id=ident)
+            session.delete(customer)
+            session.commit()
+            return customer  # noqa
+        except CustomerNotFoundError as e:
+            session.rollback()
+            raise e
+        except Exception:
+            session.rollback()
+            raise CustomerDeletionError(customer_id=ident)

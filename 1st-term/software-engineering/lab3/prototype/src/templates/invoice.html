@@ -32,21 +32,21 @@
 <body>
     <div class="invoice-container">
         <div class="invoice-header">
-            <h2>Накладная №{{ order.id }}</h2>
+            <h2>Накладная №{{ order.order_id }}</h2>
             <p>Дата создания: {{ order.created_at.strftime('%d.%m.%Y') }}</p>
         </div>
         <div class="mb-4">
             <h5>Клиент:</h5>
             <p>
-                {{ customer.fullname if customer else "Неизвестный клиент" }}<br>
-                {{ customer.email if customer else "" }}
+                {{ order.customer.fullname if order.customer else "Неизвестный клиент" }}<br>
+                {{ order.customer.email if order.customer else "" }}
             </p>
         </div>
         <div class="mb-4">
             <h5>Сотрудник:</h5>
             <p>
-                {{ employee.fullname if employee else "Неизвестный сотрудник" }}<br>
-                {{ employee.email if employee else "" }}
+                {{ order.employee.fullname if order.employee else "Неизвестный сотрудник" }}<br>
+                {{ order.employee.email if order.employee else "" }}
             </p>
         </div>
         <table class="table table-bordered invoice-table">
@@ -60,19 +60,19 @@
                 </tr>
             </thead>
             <tbody>
-                {% for item in order_items %}
+                {% for item in order.order_items %}
                 <tr>
                     <td>{{ loop.index }}</td>
                     <td>{{ item.name }}</td>
                     <td>{{ item.quantity }}</td>
-                    <td>{{ item.price }}</td>
-                    <td>{{ item.total_price }}</td>
+                    <td>{{ '{:,.2f}'.format(item.price) }}</td>
+                    <td>{{ '{:,.2f}'.format(item.total_price) }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
         <div class="text-end mt-3">
-            <h4>Итого: {{ total_price }} ₽</h4>
+            <h4>Итого: {{ '{:,.2f}'.format(order.total_price) }} ₽</h4>
         </div>
     </div>
 </body>

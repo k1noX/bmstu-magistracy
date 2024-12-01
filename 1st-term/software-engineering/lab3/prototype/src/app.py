@@ -1,7 +1,11 @@
-from flask import Flask
+from http.client import HTTPException
+
+import flask
+from flask import Flask, jsonify
 from flask_login import LoginManager
 
 from injectors.services import ServicesInjector
+from models.exception import ModuleException
 from routers import (
     main_bp,
     customers_bp,
@@ -10,9 +14,10 @@ from routers import (
     orders_bp,
 )
 
+app = Flask(__name__)
+
 
 def create_app():
-    app = Flask(__name__)
     app.secret_key = 'your_secret_key'
 
     app.register_blueprint(main_bp)
@@ -29,6 +34,33 @@ def create_app():
         return ServicesInjector().users().get_by_id(user_id)
 
     return app
+
+
+@app.errorhandler(Exception)
+def error_handler(error: Exception | ModuleException | HTTPException):
+    """
+    Обработчик ошибок для преобразования их в единый формат JSON.
+    """
+    if isinstance(error, ModuleException):
+        response = flask.jsonify(error.to_dict())
+        response.status_code = error.status_code
+    elif isinstance(error, HTTPException):
+        response = jsonify({
+            "error": error.__class__.__name__,
+            "data": {},
+        })
+        response.status_code = error.code
+    else:
+        response = jsonify({
+            "error": "InternalServerError",
+            "message": "Произошла внутренняя ошибка сервера.",
+            "data": {
+                'exception': error.__class__.__name__,
+                'data': error.args,
+            }
+        })
+        response.status_code = 500
+    return response
 
 
 if __name__ == "__main__":

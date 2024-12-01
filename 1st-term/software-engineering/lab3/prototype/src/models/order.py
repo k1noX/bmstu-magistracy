@@ -4,11 +4,18 @@ import typing
 from numbers import Number
 
 from sqlalchemy import (
-    Column, Integer, Numeric, ForeignKey, String, DateTime, func,
+    Column,
+    Integer,
+    Numeric,
+    ForeignKey,
+    String,
+    DateTime,
+    func,
 )
 from sqlalchemy.orm import relationship
 
-from .base import BaseOrmMappedModel
+from . import User, Customer
+from .base import BaseOrmMappedModel, BaseModel
 
 
 @dc.dataclass
@@ -112,3 +119,24 @@ class OrderCreation(typing.TypedDict):
     """."""
     items: list[OrderItemCreation]
     customer_id: int
+
+
+@dc.dataclass
+class OrderItemView(BaseModel):
+    """."""
+    name: str
+    product_id: int
+    quantity: int
+    price: Number
+    total_price: Number
+
+
+@dc.dataclass
+class OrderView(BaseModel):
+    """."""
+    order_id: int
+    total_price: Number
+    employee: User | None
+    customer: Customer | None
+    created_at: datetime.datetime
+    order_items: list[OrderItemView] = dc.field(default_factory=list)

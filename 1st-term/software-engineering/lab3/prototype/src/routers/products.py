@@ -21,17 +21,17 @@ def get_products():
 @login_required
 def create_product():
     creation = ProductCreation(**request.json)
-    return jsonify(ServicesInjector().products().add(creation))
+    return jsonify(ServicesInjector().products().add(creation).to_dict())
 
 
 @products_bp.route('/', methods=['DELETE'])
 @login_required
 def remove_product():
     ident = int(request.args.get('id'))
-    return jsonify(ServicesInjector().products().remove(ident))
+    return jsonify(ServicesInjector().products().remove(ident).to_dict())
 
 
 @products_bp.route('/<int:ident>/', methods=['GET'])
 @login_required
 def get_product(ident: int):
-    return jsonify(ServicesInjector().products().get_by_id(ident))
+    return jsonify(ServicesInjector().products().get_by_id(ident).to_dict())

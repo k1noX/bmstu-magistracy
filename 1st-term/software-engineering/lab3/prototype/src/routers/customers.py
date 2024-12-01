@@ -21,17 +21,20 @@ def get_customers():
 @login_required
 def create_customer():
     creation = CustomerCreation(**request.json)
-    return jsonify(ServicesInjector().customers().add(creation))
+    customer = ServicesInjector().customers().add(creation)
+    return jsonify(customer.to_dict())
 
 
 @customers_bp.route('/', methods=['DELETE'])
 @login_required
 def remove_customer():
     ident = int(request.args.get('id'))
-    return jsonify(ServicesInjector().customers().remove(ident))
+    customer = ServicesInjector().customers().remove(ident)
+    return jsonify(customer.to_dict())
 
 
 @customers_bp.route('/<int:ident>/', methods=['GET'])
 @login_required
 def get_customer(ident: int):
-    return jsonify(ServicesInjector().customers().get_by_id(ident))
+    customer = ServicesInjector().customers().get_by_id(ident)
+    return jsonify(customer.to_dict())
