@@ -1,0 +1,44 @@
+cabal-version: 2.2
+
+-- This file has been generated from package.yaml by hpack version 0.38.1.
+--
+-- see: https://github.com/sol/hpack
+
+name:           json-lesson
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/nikitakeyone/bmstu-magistracy/term_3/haskell/lab_4/39#readme>
+homepage:       https://github.com/nikitakeyone/bmstu-magistracy#readme
+bug-reports:    https://github.com/nikitakeyone/bmstu-magistracy/issues
+author:         Nikita Safronov
+maintainer:     Nikita Safronov
+copyright:      2025 Nikita Safronov
+license:        BSD-3-Clause
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    CHANGELOG.md
+
+source-repository head
+  type: git
+  location: https://github.com/nikitakeyone/bmstu-magistracy
+
+executable json-lesson-exe
+  main-is: Main.hs
+  other-modules:
+      Book
+      Paths_json_lesson
+  autogen-modules:
+      Paths_json_lesson
+  hs-source-dirs:
+      app
+  default-extensions:
+      OverloadedStrings
+      DeriveGeneric
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      aeson
+    , base >=4.7 && <5
+    , bytestring
+    , text
+  default-language: Haskell2010
